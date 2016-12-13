@@ -11,7 +11,6 @@ class ExtendedIngredient(Ingredient):
 	full_text = StringField(max_length=500)
 	amount = IntField()
 	unit = StringField(max_length=25)
-	category = StringField(max_length=50) #just for spoonacular
 
 class Review(EmbeddedDocument):
 	id = StringField(max_length=500, required=True)
@@ -31,20 +30,12 @@ class Recipe(Document):
 	ingredients = ListField(EmbeddedDocumentField('ExtendedIngredient'))
 	image = StringField(max_length=255)
 	instructions = StringField(max_length=500)
-	vegetarian = BooleanField()
-	vegan = BooleanField()
-	glutenFree = BooleanField()
-	dairyFree = BooleanField()
-	fatFree = BooleanField()
-	peanutFree = BooleanField()
-	calories = FloatField()
+	labels = ListField(StringField(max_length=100))
 	reviews = ListField(EmbeddedDocumentField('Review'))
 
 class User(Document, UserMixin):
-	first_name = StringField(max_length=255, required=True)
-	last_name = StringField(max_length=255, required=True)
-	fb_id = IntField(required=True)
-	fb_token = StringField(max_length=255, required=True)
+	name = StringField(max_length=255, required=True)
+	password =
 	age = IntField()
 	gender = BinaryField()
 	email = StringField(max_length=255)
