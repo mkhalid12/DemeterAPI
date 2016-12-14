@@ -29,13 +29,13 @@ def load_user(user_id):
 def unauthorized():
 	return json.dumps({ "status": "401", "message" : "Unauthorized" }), 401
 
-def return_200():
+def status_200():
 	return json.dumps({ "status": "200", "message" : "Success" }), 200
 
-def return_400():
+def status_400():
 	return json.dumps({ "status": "400", "message" : "Invalid parameters" }), 400
 
-def return_404():
+def status_404():
 	return json.dumps({ "status": "404", "message" : "Resource not found" }), 404
 
 @app.route("/login", methods=['POST'])
@@ -47,11 +47,11 @@ def login():
 
 			user = dao.authenticate_user(email, password)
 			login_user(user)
-			return json.dumps({ "status": "200", "message" : "Success" }), 200
+			return self.status_200()
 		except:
-			return json.dumps({ "status": "404", "message" : "User not found" }), 404
+			return self.status_404()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid parameters" }), 400
+		return self.status_400()
 
 @app.route('/users/create_profile', methods=['POST'])
 @login_required
@@ -71,9 +71,9 @@ def create_user_profile():
 
 			return jsonify ( { 'user' : user } )
 		except:
-			return json.dumps({ "status": "400", "message" : "Invalid parameters" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid parameters" }), 400
+		return self.status_400()
 
 @app.route('/users/<string:id>', methods=['GET'])
 def get_user(id):
@@ -83,7 +83,7 @@ def get_user(id):
 			return json.dumps({ "status": "404", "message" : "User not found" }), 404
 		return jsonify ( { 'user' : user } )
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter" }), 400
+		return self.status_400()
 
 @app.route('/recipes', methods=['GET'])
 def get_recipes():
@@ -100,6 +100,8 @@ def get_recipes():
 	if "label":
 		label = request.json['label']'''
 
+	query_filter = query_filter[:-1]
+
 	recipes = dao.get_recipes_by_user_filters(query_filter)
 	return recipes
 
@@ -113,10 +115,10 @@ def get_recipe(id):
 	if ObjectId.is_valid(id):
 		recipe = dao.get_recipe(id)
 		if recipe is None:
-			return json.dumps({ "status": "404", "message" : "Recipe not found" }), 404
+			return self.status_404()
 		return jsonify ( { 'recipe' : recipe } )
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter" }), 400
+		return self.status_400()
 
 @app.route('/reviews', methods=['GET'])
 def get_recipe_reviews():
@@ -129,11 +131,11 @@ def get_recipe_reviews():
 					reviews = dao.get_recipe_reviews(recipe_id)
 					return reviews
 				except:
-					return json.dumps({ "status": "404", "message" : "Recipe not found" }), 404
+					return self.status_404()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+		return self.status_400()
 
 @app.route('/reviews/add', methods=['POST'])
 @login_required
@@ -149,17 +151,17 @@ def add_recipe_review():
 					if ObjectId.is_valid(user_id):
 						try:
 							dao.save_recipe_review(user_id, recipe_id, text)
-							return json.dumps({ "status": "200", "message" : "Success" }), 200
+							return self.status_200()
 						except:
-							return json.dumps({ "status": "404", "message" : "Recipe or User not found" }), 404
+							return self.status_404()
 					else:
-						return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+						return self.status_400()
 				else:
-					return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+					return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+		return self.status_400()
 
 #put user id in reviews too
 @app.route('/reviews/delete', methods=['DELETE'])
@@ -174,17 +176,17 @@ def delete_recipe_review():
 				if ObjectId.is_valid(review_id):
 					try:
 						dao.delete_recipe_review(recipe_id, review_id)
-						return json.dumps({ "status": "200", "message" : "Success" }), 200
+						return self.status_200()
 					except:
-						return json.dumps({ "status": "404", "message" : "Recipe/review not found" }), 404
+						return self.status_404()
 				else:
-					return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+					return self.status_400()
 			else:
-				return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+				return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter recipe_id" }), 400
+		return self.status_400()
 
 @app.route('/favorite_recipes/', methods=['GET'])
 def favorite_recipes():
@@ -198,11 +200,11 @@ def favorite_recipes():
 					recipes = dao.get_user_favorite_recipes(user_id)
 					return recipes
 				except:
-					return json.dumps({ "status": "404", "message" : "User not found" }), 404
+					return self.status_404()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter user_id" }), 400
+		return self.status_400()
 
 @app.route('/favorite_recipes/add', methods=['POST'])
 @login_required
@@ -219,17 +221,17 @@ def favorite_recipes():
 					if ObjectId.is_valid(user_id):
 						try:
 							dao.favorite_recipe(recipe_id, user_id)
-							return json.dumps({ "status": "200", "message" : "Success" }), 200
+							return self.status_200()
 						except:
-							return json.dumps({ "status": "404", "message" : "Recipe or User not found" }), 404
+							return self.status_404()
 					else:
-						return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+						return self.status_400()
 				else:
-					return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+					return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter user_id" }), 400
+		return self.status_400()
 
 @app.route('/favorite_recipes/delete', methods=['DELETE'])
 @login_required
@@ -246,17 +248,17 @@ def favorite_recipes():
 					if ObjectId.is_valid(recipe_id):
 						try:
 							dao.unfavorite_recipe(recipe_id, user_id)
-							return json.dumps({ "status": "200", "message" : "Success" }), 200
+							return self.status_200()
 						except:
-							return json.dumps({ "status": "404", "message" : "Recipe/user not found" }), 404
+							return self.status_404()
 					else:
-						return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+						return self.status_400()
 				else:
-					return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+					return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+			return self.status_400()
 	else:
-		return json.dumps({ "status": "400", "message" : "Invalid Parameter user_id" }), 400
+		return self.status_400()
 
 #authentication TODO change in swagger just for GET from user id and put inside recipe as well
 @app.route('/ratings', methods=['GET', 'POST'])
@@ -268,11 +270,11 @@ def ratings():
 				try:
 					ratings = dao.get_user_ratings(user_id)
 				except:
-					return json.dumps({ "status": "404", "message" : "User not found" }), 404
+					return self.status_404()
 			else:
-				return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+				return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+			return self.status_400()
 
 	elif method == 'POST':
 		if "recipe_id" in request.json and "user_id" in request.json and "rating" in request.json:
@@ -284,13 +286,13 @@ def ratings():
 			if ObjectId.is_valid(user_id) and ObjectId.is_valid(recipe_id):
 				try:
 					dao.save_user_recipe_rating(user_id, recipe_id, rating)
-					return json.dumps({ "status": "200", "message" : "Success" }), 200
+					return self.status_200()
 				except:
-					return json.dumps({ "status": "404", "message" : "Recipe/user not found" }), 404
+					return self.status_404()
 			else:
-				return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+				return self.status_400()
 		else:
-			return json.dumps({ "status": "400", "message" : "Invalid Parameters" }), 400
+			return self.status_400()
 
 @app.route('/recommendations/recommend_recipe', methods=['GET'])
 def recommend_recipes():
