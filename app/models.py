@@ -25,7 +25,6 @@ class Rating(Document):
 	rating = IntField(required=True)
 
 class Recipe(Document):
-	recipe_id = SequenceField()
 	title = StringField(max_length=255, required=True)
 	ingredients = ListField(EmbeddedDocumentField('ExtendedIngredient'))
 	image = StringField(max_length=255)
@@ -33,15 +32,13 @@ class Recipe(Document):
 	labels = ListField(StringField(max_length=100))
 	reviews = ListField(EmbeddedDocumentField('Review'))
 
-class User(Document, UserMixin):
+class User(Document):
 	name = StringField(max_length=255, required=True)
-	password =
 	age = IntField()
 	gender = BinaryField()
 	email = StringField(max_length=255)
-	location = StringField(max_length=255)
-	coordinates = StringField(max_length=255)
+	city = StringField(max_length=255)
+	country = StringField(max_length=255)
 	preferred_ingredients = ListField(EmbeddedDocumentField('Ingredient'))
-	allergies = ListField(EmbeddedDocumentField('Ingredient'))
-	diet_labels = ListField(StringField(max_length=50))
+	restricted_ingredients = ListField(EmbeddedDocumentField('Ingredient'))
 	favorite_recipes = ListField(ReferenceField('Recipe'))

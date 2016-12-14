@@ -1,45 +1,41 @@
-from app.models import *
+from models import *
 
 class Dao:
 
 	# USER
-	def create_user(self, fb_id, first_name, last_name, access_token):
-		user = User(
-			fb_id=fb_id,
-			first_name=first_name,
-			last_name=last_name,
-			fb_token=access_token
-		)
-		user.save()
-		return user
-
 	def get_user(self, user_id):
 		user = User.objects.filter(id=user_id).first()
 
-		user = {
-			'age' : user.age,
-			'gender' : user.gender,
-			'location' : user.location,
-			'coordinates' : user.coordinates,
-			'ingredients' : user.preferred_ingredients,
-			'restrictions' : user.allergies,
-			'diet_labels' : user.diet_labels,
-			'favorite_recipes' : user.favorite_recipes
-		}
+		if user is not None:
+			favorite_recipes = []
+
+			for recipe in user.favorite_recipes:
+				favorite_recipes.append("localhost:5000/recipes/"+str(recipe.id))
+
+			preferred_ingredients = []
+			restricted_ingredients = []
+
+			for ingredient in user.preferred_ingredients:
+				preferred_ingredients.append(ingredient['name'])
+
+			for ingredient in user.restricted_ingredients:
+				restricted_ingredients.append(ingredient['name'])
+
+			user = {
+				'age' : user.age,
+				'gender' : user.gender,
+				'city' : user.city,
+				'country' : user.country,
+				'preferred_ingredients' : preferred_ingredients,
+				'restricted_ingredients' : restricted_ingredients,
+				'favorite_recipes' : favorite_recipes
+			}
 
 		return user
 
-	def get_user_by_fb(self, fb_id):
-		user = User.objects(fb_id=fb_id).first()
-		return user
-
-	def update_user_fb_token(self, user, fb_token):
-		user.update(fb_token=fb_token)
-		return user
-
-	def set_user(self, user_id, age, gender, location, coordinates, ingredients, restrictions, diet_labels):
-		preferred_ingredients = []
+	def create_user(self, name, email, age, gender, city, country, ingredients, restrictions):
 		ingredient_restrictions = []
+		preferred_ingredients = []
 
 		for ingredient_name in ingredients:
 			ingredient = Ingredient(
@@ -53,17 +49,18 @@ class Dao:
 			)
 			ingredient_restrictions.append(ingredient)
 
-		user = User.objects.filter(id=user_id).first()
+		user = User(
+			city=city,
+			country=country,
+			email=email,
+			name=name,
+			age=age,
+			gender=gender,
+			preferred_ingredients=preferred_ingredients,
+			restricted_ingredients=restricted_ingredients
+		)
 
-		user.update(**{
-			'set__age' : age,
-			'set__gender': gender,
-			'set__location' : location,
-			'set__coordinates' : coordinates,
-			'set__preferred_ingredients':preferred_ingredients,
-			'set__allergies':ingredient_restrictions,
-			'set__diet_labels':diet_labels
-		})
+		user.save()
 
 	def favorite_recipe(self, recipe_id, user_id):
 		user = User.objects.filter(id=user_id).first()
@@ -129,55 +126,29 @@ class Dao:
 	def get_recipe(self, recipe_id):
 		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
 
-		ingredients = []
-
-		for ingredient in recipe['ingredients']:
-			ingredients.append({
-				'text' : ingredient['full_text']
-			})
-
-		recipe = {
-			'id' : recipe_id,
-			'title' : recipe['title'],
-			'img' : recipe['image'],
-			'instructions' : recipe['instructions'],
-			'vegetarian' : recipe['vegetarian'],
-			'glutenFree' : recipe['glutenFree'],
-			'dairyFree' : recipe['dairyFree'],
-			'fatFree' : recipe['fatFree'],
-			'peanutFree' : recipe['peanutFree'],
-			'calories' : recipe['calories'],
-			'ingredients' : ingredients
-		}
-
-		return recipe
-
-	def get_recipes_from_ids(self, recipes_ids):
-		all_recipes = Recipe.objects.filter(recipe_id__in=recipes_ids)
-
-		recipes = []
-
-		for recipe in all_recipes:
+		if recipe is not None:
 			ingredients = []
 
 			for ingredient in recipe['ingredients']:
-				ingredients.append({
-					'text' : ingredient['full_text']
-				})
+				ingredients.append(ingredient['full_text'])
 
-			recipes.append({
-				'id' : recipe['id'],
+			reviews = []
+
+			for review in recipe.reviews:
+				user = self.get_user(review.user.id)
+				reviews.append({ 'text' : review.text, 'user' : user, 'date' : review.date })
+
+			recipe = {
+				'id' : recipe_id,
 				'title' : recipe['title'],
-				'vegetarian' : recipe['vegetarian'],
-				'glutenFree' : recipe['glutenFree'],
-				'dairyFree' : recipe['dairyFree'],
-				'ingredients' : ingredients
-			})
+				'img' : recipe['image'],
+				'instructions' : recipe['instructions'],
+				'labels' : recipe['labels'],
+				'ingredients' : ingredients,
+				'reviews' : reviews
+			}
 
-		return recipes
-
-	def get_all_recipes_ids_per_ingredient(self, ingredient):
-		return Recipe.objects(ingredients__name=ingredient).scalar("recipe_id")
+		return recipe
 
 	def get_recipe_reviews(self, recipe_id):
 		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
@@ -212,13 +183,5 @@ class Dao:
 		return Recipe.objects(id=str(recipe_id)).update(pull__reviews__id=str(review_id))
 
 	# INGREDIENTS
-	def get_ingredients_per_recipe_id(self, recipe_id):
-		ingredients = Recipe.objects.filter(recipe_id=recipe_id).only("ingredients").first().ingredients
-
-		ingredients_names = []
-		for ingredient in ingredients:
-			ingredients_names.append(ingredient.name)
-		return ingredients_names
-
 	def get_all_ingredients(self):
 		return Recipe.objects.distinct(field="ingredients.name")
