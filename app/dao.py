@@ -3,6 +3,10 @@ from models import *
 class Dao:
 
 	# USER
+	def authenticate_user(self, email, password):
+		user = User.objects.filter(email=email).first()
+		return user
+
 	def get_user(self, user_id):
 		user = User.objects.filter(id=user_id).first()
 
@@ -88,20 +92,17 @@ class Dao:
 		return user_favorite_recipes
 
 	# RATING
-	def get_all_ratings(self):
-		return Rating.objects()
+	def get_recipe_ratings(self, recipe_id):
+		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
+		ratings = Rating.objects.filter(recipe=recipe)
+
+		return ratings
 
 	def get_user_ratings(self, user_id):
 		user = User.objects.filter(id=str(user_id)).first()
 		ratings = Rating.objects.filter(user=user)
 
-		user_recipes_rating = dict()
-
-		for rating in ratings:
-			if str(rating.recipe.id) not in user_recipes_rating:
-				user_recipes_rating[str(rating.recipe.id)] = rating.rating
-
-		return user_recipes_rating
+		return ratings
 
 	def save_user_recipe_rating(self, user_id, recipe_id, rating):
 		user = User.objects.filter(id=user_id).first()
@@ -138,6 +139,10 @@ class Dao:
 				user = self.get_user(review.user.id)
 				reviews.append({ 'text' : review.text, 'user' : user, 'date' : review.date })
 
+			ratings = []
+			for rating in Rating.objects.filter(recipe=recipe).only("rating"):
+				ratings.append(rating.rating)
+
 			recipe = {
 				'id' : recipe_id,
 				'title' : recipe['title'],
@@ -145,7 +150,8 @@ class Dao:
 				'instructions' : recipe['instructions'],
 				'labels' : recipe['labels'],
 				'ingredients' : ingredients,
-				'reviews' : reviews
+				'reviews' : reviews,
+				'ratings' : ratings
 			}
 
 		return recipe
@@ -181,6 +187,14 @@ class Dao:
 
 	def delete_recipe_review(self, recipe_id, review_id):
 		return Recipe.objects(id=str(recipe_id)).update(pull__reviews__id=str(review_id))
+
+	def get_recipes_by_user_filters(self, filters):
+		favorite_recipes = User.objects(filters).only(favorite_recipes).as_pymongo()
+		recipes = []
+
+		for recipe in favorite_recipes:
+			recipes.append(self.get_recipe(recipe.id))
+		return recipes
 
 	# INGREDIENTS
 	def get_all_ingredients(self):

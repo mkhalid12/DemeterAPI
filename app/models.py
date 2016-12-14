@@ -32,7 +32,7 @@ class Recipe(Document):
 	labels = ListField(StringField(max_length=100))
 	reviews = ListField(EmbeddedDocumentField('Review'))
 
-class User(Document):
+class User(Document, UserMixin):
 	name = StringField(max_length=255, required=True)
 	age = IntField()
 	gender = BinaryField()
