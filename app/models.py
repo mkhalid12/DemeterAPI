@@ -2,8 +2,13 @@ import datetime
 from flask_login import UserMixin
 from mongoengine import *
 
+class SimilarIngredient(Document):
+	name = StringField(max_length=255, required=True)
+	similar_ingredients = ListField(StringField(max_length=255))
+
 class Ingredient(EmbeddedDocument):
 	name = StringField(max_length=255, required=True)
+	similar_ingredients = ListField(StringField(max_length=255))
 	meta = {'allow_inheritance': True}
 
 #not necessary to inherit EmbeddedDocument again since Ingredient already does
@@ -31,6 +36,7 @@ class Recipe(Document):
 	instructions = StringField(max_length=500)
 	labels = ListField(StringField(max_length=100))
 	reviews = ListField(EmbeddedDocumentField('Review'))
+	similar_recipes = ListField(ReferenceField('Recipe'))
 
 class User(Document, UserMixin):
 	name = StringField(max_length=255, required=True)

@@ -144,7 +144,7 @@ class Dao:
 				ratings.append(rating.rating)
 
 			recipe = {
-				'id' : recipe_id,
+				#'id' : recipe_id,
 				'title' : recipe['title'],
 				'img' : recipe['image'],
 				'instructions' : recipe['instructions'],
@@ -155,6 +155,15 @@ class Dao:
 			}
 
 		return recipe
+
+	def get_similar_recipes(self, recipe_id):
+		_similar_recipes = Recipe.objects(id=str(recipe_id)).only("similar_recipes").first().similar_recipes
+		similar_recipes = []
+
+		for recipe in _similar_recipes:
+			similar_recipes.append(self.get_recipe(recipe.id))
+
+		return similar_recipes
 
 	def get_recipe_reviews(self, recipe_id):
 		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
@@ -199,3 +208,7 @@ class Dao:
 	# INGREDIENTS
 	def get_all_ingredients(self):
 		return Recipe.objects.distinct(field="ingredients.name")
+
+	def get_similar_ingredients(self, ingredient_name):
+		similar_ingredients = SimilarIngredient.objects(name=ingredient_name).scalar("similar_ingredients")
+		return similar_ingredients

@@ -188,7 +188,7 @@ def delete_recipe_review():
 	else:
 		return self.status_400()
 
-@app.route('/favorite_recipes/', methods=['GET'])
+@app.route('/favorite_recipes', methods=['GET'])
 def favorite_recipes():
 	if "user_id" in request.json:
 		user_id = request.json["user_id"]
@@ -208,7 +208,7 @@ def favorite_recipes():
 
 @app.route('/favorite_recipes/add', methods=['POST'])
 @login_required
-def favorite_recipes():
+def add_favorite_recipes():
 	if "user_id" in request.json:
 		user_id = request.json["user_id"]
 
@@ -235,7 +235,7 @@ def favorite_recipes():
 
 @app.route('/favorite_recipes/delete', methods=['DELETE'])
 @login_required
-def favorite_recipes():
+def delete_favorite_recipes():
 	if "user_id" in request.json:
 		user_id = request.json["user_id"]
 
@@ -294,20 +294,32 @@ def ratings():
 		else:
 			return self.status_400()
 
-@app.route('/recommendations/recommend_recipe', methods=['GET'])
+@app.route('/recommendations/recommend_recipes', methods=['GET'])
 def recommend_recipes():
-	recipe_id = request.json["recipe_id"]
+	if "recipe_id" in request.json:
+		try:
+			recipe_id = request.json["recipe_id"]
 
-	recipes = dao.get_similar_recipes(recipe_id)
-	return recipes
+			recipes = json.loads(json_util.dumps(dao.get_similar_recipes(recipe_id)))
+			return jsonify({ 'similar_recipes' : recipes })
+		except:
+			return self.status_400()
+	else:
+		return self.status_400()
 
 @app.route('/recommendations/recommend_ingredient', methods=['GET'])
 def recommend_ingredient():
-	ingredient_name = request.json["ingredient_name"]
+	if "ingredient_name" in request.json:
+		try:
+			ingredient_name = request.json["ingredient_name"]
 
-	ingredients = dao.get_similar_ingredients(ingredient_name)
-	return ingredients
-
+			ingredients = dao.get_similar_ingredients(ingredient_name)
+			return jsonify ({ 'similar_recipes' : json.loads(json_util.dumps(ingredients)) })
+		except:
+			return self.status_400()
+	else:
+		return self.status_400()
+		
 if __name__ == '__main__':
 	app.secret_key = 'secret key'
 	from os import environ
