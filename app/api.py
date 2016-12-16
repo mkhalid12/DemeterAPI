@@ -213,7 +213,6 @@ def favorite_recipes():
 		return self.status_400()
 
 @app.route('/favorite_recipes/add', methods=['POST'])
-@login_required
 def add_favorite_recipes():
 	if "user_id" in request.json:
 		user_id = request.json["user_id"]
@@ -240,7 +239,6 @@ def add_favorite_recipes():
 		return self.status_400()
 
 @app.route('/favorite_recipes/delete', methods=['DELETE'])
-@login_required
 def delete_favorite_recipes():
 	if "user_id" in request.json:
 		user_id = request.json["user_id"]
@@ -283,6 +281,7 @@ def get_user_ratings():
 		return self.status_400()
 
 @app.route('/ratings', methods=['POST'])
+@login_required
 def new_user_ratings():
 	if "recipe_id" in request.json and "user_id" in request.json and "rating" in request.json:
 
