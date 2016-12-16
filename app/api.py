@@ -95,23 +95,22 @@ def get_user(id):
 
 @app.route('/recipes', methods=['GET'])
 def get_recipes():
-	query_filter = ""
-	#put try catch
-	if "city" in request.json:
-		query_filter += "city='"+request.json['location']+"',"
-	if "age_min" in request.json:
-		query_filter += "age__gte="+str(request.json['age_min']) + ","
-	if "age_max" in request.json:
-		query_filter += "age__lte="+str(request.json['age_max']) + ","
-	'''if "ingredients" in request.json:
-		query_filter += "ingredients__name__contains="+str(request.json['ingredients']) + ","
-	if "label":
-		label = request.json['label']'''
+	try:
+		query_filter = ""
 
-	query_filter = query_filter[:-1]
+		if "city" in request.json:
+			query_filter += "city='"+request.json['location']+"',"
+		if "age_min" in request.json:
+			query_filter += "age__gte="+str(request.json['age_min']) + ","
+		if "age_max" in request.json:
+			query_filter += "age__lte="+str(request.json['age_max']) + ","
 
-	recipes = dao.get_recipes_by_user_filters(query_filter)
-	return recipes
+		query_filter = query_filter[:-1]
+
+		recipes = dao.get_recipes_by_user_filters(query_filter)
+		return recipes
+	except:
+		return self.status_400()
 
 @app.route('/ingredients', methods=['GET'])
 def get_all_ingredients():
@@ -171,7 +170,6 @@ def add_recipe_review():
 	else:
 		return self.status_400()
 
-#put user id in reviews too
 @app.route('/reviews/delete', methods=['DELETE'])
 @login_required
 def delete_recipe_review():
@@ -268,39 +266,41 @@ def delete_favorite_recipes():
 	else:
 		return self.status_400()
 
-#authentication TODO change in swagger just for GET from user id and put inside recipe as well
-@app.route('/ratings', methods=['GET', 'POST'])
-def ratings():
-	if method == 'GET':
-		if "user_id" in request.json:
-			user_id = request.json["user_id"]
-			if ObjectId.is_valid(user_id):
-				try:
-					ratings = dao.get_user_ratings(user_id)
-				except:
-					return self.status_404()
-			else:
-				return self.status_400()
+@app.route('/ratings', methods=['GET'])
+def get_user_ratings():
+	if "user_id" in request.json:
+		user_id = request.json["user_id"]
+		if ObjectId.is_valid(user_id):
+			try:
+				ratings = dao.get_user_ratings(user_id)
+				print ratings
+				return jsonify ({ 'ratings' : json.loads(json_util.dumps(ratings)) })
+			except:
+				return self.status_404()
 		else:
 			return self.status_400()
+	else:
+		return self.status_400()
 
-	elif method == 'POST':
-		if "recipe_id" in request.json and "user_id" in request.json and "rating" in request.json:
+@app.route('/ratings', methods=['POST'])
+@login_required
+def new_user_ratings():
+	if "recipe_id" in request.json and "user_id" in request.json and "rating" in request.json:
 
-			user_id = request.json["user_id"]
-			recipe_id = request.json["recipe_id"]
-			rating = request.json["rating"]
+		user_id = request.json["user_id"]
+		recipe_id = request.json["recipe_id"]
+		rating = request.json["rating"]
 
-			if ObjectId.is_valid(user_id) and ObjectId.is_valid(recipe_id):
-				try:
-					dao.save_user_recipe_rating(user_id, recipe_id, rating)
-					return self.status_200()
-				except:
-					return self.status_404()
-			else:
-				return self.status_400()
+		if ObjectId.is_valid(user_id) and ObjectId.is_valid(recipe_id):
+			try:
+				dao.save_user_recipe_rating(user_id, recipe_id, rating)
+				return self.status_200()
+			except:
+				return self.status_404()
 		else:
 			return self.status_400()
+	else:
+		return self.status_400()
 
 @app.route('/recommendations/recommend_recipes', methods=['GET'])
 def recommend_recipes():

@@ -14,7 +14,7 @@ class Dao:
 			favorite_recipes = []
 
 			for recipe in user.favorite_recipes:
-				favorite_recipes.append("localhost:5000/recipes/"+str(recipe.id))
+				favorite_recipes.append("https://guarded-mesa-45511.herokuapp.com/recipes/"+str(recipe.id))
 
 			preferred_ingredients = []
 			restricted_ingredients = []
