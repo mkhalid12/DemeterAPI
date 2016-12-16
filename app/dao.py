@@ -100,7 +100,7 @@ class Dao:
 
 	def get_user_ratings(self, user_id):
 		user = User.objects.filter(id=str(user_id)).first()
-		ratings = Rating.objects.filter(user=user)
+		ratings = Rating.objects.filter(user=user).as_pymongo()
 
 		return ratings
 
