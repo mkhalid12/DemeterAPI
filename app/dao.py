@@ -100,9 +100,14 @@ class Dao:
 
 	def get_user_ratings(self, user_id):
 		user = User.objects.filter(id=str(user_id)).first()
-		ratings = Rating.objects.filter(user=user).as_pymongo()
+		ratings = Rating.objects.filter(user=user)
 
-		return ratings
+		user_recipe_rating = []
+
+		for rating in ratings:
+			user_recipe_rating.append({ 'rating' : rating.rating, 'user' : "https://guarded-mesa-45511.herokuapp.com/users/"+str(rating.user.id), 'recipe' : "https://guarded-mesa-45511.herokuapp.com/recipes/"+str(rating.recipe.id)})
+
+		return user_recipe_rating
 
 	def save_user_recipe_rating(self, user_id, recipe_id, rating):
 		user = User.objects.filter(id=user_id).first()
