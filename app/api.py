@@ -10,7 +10,15 @@ import json
 MONGODB_SETTINGS = {'DB': "demeter_api"}
 
 app = Flask(__name__)
-app.config['MONGODB_SETTINGS'] = MONGODB_SETTINGS
+#app.config['MONGODB_SETTINGS'] = MONGODB_SETTINGS
+app.config["MONGODB_DB"] = 'demeter_api'
+connect(
+    'demeter_api',
+    username='larissaleite',
+    password='chamos',
+    host='mongodb://larissaleite:chamos@ds133378.mlab.com:33378/demeter_api',
+    port=133378
+)
 
 db = MongoEngine(app)
 
@@ -319,7 +327,7 @@ def recommend_ingredient():
 			return self.status_400()
 	else:
 		return self.status_400()
-		
+
 if __name__ == '__main__':
 	app.secret_key = 'secret key'
 	from os import environ
