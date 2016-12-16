@@ -67,13 +67,13 @@ class Dao:
 		user.save()
 
 	def favorite_recipe(self, recipe_id, user_id):
-		user = User.objects.filter(id=user_id).first()
+		user = User.objects.filter(id=str(user_id)).first()
 		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
 
 		user.update(add_to_set__favorite_recipes=recipe)
 
 	def unfavorite_recipe(self, recipe_id, user_id):
-		user = User.objects.filter(id=user_id).first()
+		user = User.objects.filter(id=str(user_id)).first()
 		recipe = Recipe.objects.filter(id=str(recipe_id)).first()
 
 		user.update(pull__favorite_recipes=recipe)
