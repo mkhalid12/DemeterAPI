@@ -55,11 +55,11 @@ def login():
 
 			user = dao.authenticate_user(email, password)
 			login_user(user)
-			return self.status_200()
+			return status_200()
 		except:
-			return self.status_404()
+			return status_404()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/users/create_profile', methods=['POST'])
 @login_required
@@ -79,9 +79,9 @@ def create_user_profile():
 
 			return jsonify ( { 'user' : user } )
 		except:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/users/<string:id>', methods=['GET'])
 def get_user(id):
@@ -91,7 +91,7 @@ def get_user(id):
 			return json.dumps({ "status": "404", "message" : "User not found" }), 404
 		return jsonify ( { 'user' : user } )
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/recipes', methods=['GET'])
 def get_recipes():
@@ -110,7 +110,7 @@ def get_recipes():
 		recipes = dao.get_recipes_by_user_filters(query_filter)
 		return recipes
 	except:
-		return self.status_400()
+		return status_400()
 
 @app.route('/ingredients', methods=['GET'])
 def get_all_ingredients():
@@ -122,10 +122,10 @@ def get_recipe(id):
 	if ObjectId.is_valid(id):
 		recipe = dao.get_recipe(id)
 		if recipe is None:
-			return self.status_404()
+			return status_404()
 		return jsonify ( { 'recipe' : recipe } )
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/reviews', methods=['GET'])
 def get_recipe_reviews():
@@ -137,11 +137,11 @@ def get_recipe_reviews():
 				reviews = dao.get_recipe_reviews(recipe_id)
 				return reviews
 			except:
-				return self.status_404()
+				return status_404()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/reviews/add', methods=['POST'])
 @login_required
@@ -156,15 +156,15 @@ def add_recipe_review():
 			if ObjectId.is_valid(user_id):
 				try:
 					dao.save_recipe_review(user_id, recipe_id, text)
-					return self.status_200()
+					return status_200()
 				except:
-					return self.status_404()
+					return status_404()
 			else:
-				return self.status_400()
+				return status_400()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/reviews/delete', methods=['DELETE'])
 @login_required
@@ -177,15 +177,15 @@ def delete_recipe_review():
 			if ObjectId.is_valid(review_id):
 				try:
 					dao.delete_recipe_review(recipe_id, review_id)
-					return self.status_200()
+					return status_200()
 				except:
-					return self.status_404()
+					return status_404()
 			else:
-				return self.status_400()
+				return status_400()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/favorite_recipes', methods=['GET'])
 def favorite_recipes():
@@ -193,16 +193,15 @@ def favorite_recipes():
 		user_id = request.json["user_id"]
 
 		if ObjectId.is_valid(user_id):
-
 			try:
 				recipes = dao.get_user_favorite_recipes(user_id)
-				return recipes
+				return jsonify({ 'recipes' : recipes })
 			except:
-				return self.status_404()
+				return status_404()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/favorite_recipes/add', methods=['POST'])
 def add_favorite_recipes():
@@ -217,17 +216,17 @@ def add_favorite_recipes():
 				if ObjectId.is_valid(user_id):
 					try:
 						dao.favorite_recipe(recipe_id, user_id)
-						return self.status_200()
+						return status_200()
 					except:
-						return self.status_404()
+						return status_404()
 				else:
-					return self.status_400()
+					return status_400()
 			else:
-				return self.status_400()
+				return status_400()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/favorite_recipes/delete', methods=['DELETE'])
 def delete_favorite_recipes():
@@ -242,17 +241,17 @@ def delete_favorite_recipes():
 				if ObjectId.is_valid(recipe_id):
 					try:
 						dao.unfavorite_recipe(recipe_id, user_id)
-						return self.status_200()
+						return status_200()
 					except:
-						return self.status_404()
+						return status_404()
 				else:
-					return self.status_400()
+					return status_400()
 			else:
-				return self.status_400()
+				return status_400()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/ratings', methods=['GET'])
 def get_user_ratings():
@@ -264,11 +263,11 @@ def get_user_ratings():
 				print ratings
 				return jsonify ({ 'ratings' : json.loads(json_util.dumps(ratings)) })
 			except:
-				return self.status_404()
+				return status_404()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/ratings', methods=['POST'])
 @login_required
@@ -282,13 +281,13 @@ def new_user_ratings():
 		if ObjectId.is_valid(user_id) and ObjectId.is_valid(recipe_id):
 			try:
 				dao.save_user_recipe_rating(user_id, recipe_id, rating)
-				return self.status_200()
+				return status_200()
 			except:
-				return self.status_404()
+				return status_404()
 		else:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/recommendations/recommend_recipes', methods=['GET'])
 def recommend_recipes():
@@ -299,9 +298,9 @@ def recommend_recipes():
 			recipes = json.loads(json_util.dumps(dao.get_similar_recipes(recipe_id)))
 			return jsonify({ 'similar_recipes' : recipes })
 		except:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 @app.route('/recommendations/recommend_ingredient', methods=['GET'])
 def recommend_ingredient():
@@ -312,9 +311,9 @@ def recommend_ingredient():
 			ingredients = dao.get_similar_ingredients(ingredient_name)
 			return jsonify ({ 'similar_recipes' : json.loads(json_util.dumps(ingredients)) })
 		except:
-			return self.status_400()
+			return status_400()
 	else:
-		return self.status_400()
+		return status_400()
 
 if __name__ == '__main__':
 	app.secret_key = 'secret key'
