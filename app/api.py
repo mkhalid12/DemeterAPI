@@ -133,12 +133,11 @@ def get_recipe_reviews():
 		recipe_id = request.json["recipe_id"]
 
 		if ObjectId.is_valid(recipe_id):
-			if method == 'GET':
-				try:
-					reviews = dao.get_recipe_reviews(recipe_id)
-					return reviews
-				except:
-					return self.status_404()
+			try:
+				reviews = dao.get_recipe_reviews(recipe_id)
+				return reviews
+			except:
+				return self.status_404()
 		else:
 			return self.status_400()
 	else:
@@ -150,21 +149,18 @@ def add_recipe_review():
 	if recipe_id in request.json:
 		recipe_id = request.json["recipe_id"]
 
-		if method == 'POST':
-				if "user_id" in request.json and "text" in request.json:
-					user_id = request.json["user_id"]
-					text = request.json["text"]
+		if "user_id" in request.json and "text" in request.json:
+			user_id = request.json["user_id"]
+			text = request.json["text"]
 
-					if ObjectId.is_valid(user_id):
-						try:
-							dao.save_recipe_review(user_id, recipe_id, text)
-							return self.status_200()
-						except:
-							return self.status_404()
-					else:
-						return self.status_400()
-				else:
-					return self.status_400()
+			if ObjectId.is_valid(user_id):
+				try:
+					dao.save_recipe_review(user_id, recipe_id, text)
+					return self.status_200()
+				except:
+					return self.status_404()
+			else:
+				return self.status_400()
 		else:
 			return self.status_400()
 	else:
@@ -176,17 +172,14 @@ def delete_recipe_review():
 	if recipe_id in request.json:
 		recipe_id = request.json["recipe_id"]
 
-		if method == 'DELETE':
-			if "review_id" in request.json:
-				review_id = request.json["review_id"]
-				if ObjectId.is_valid(review_id):
-					try:
-						dao.delete_recipe_review(recipe_id, review_id)
-						return self.status_200()
-					except:
-						return self.status_404()
-				else:
-					return self.status_400()
+		if "review_id" in request.json:
+			review_id = request.json["review_id"]
+			if ObjectId.is_valid(review_id):
+				try:
+					dao.delete_recipe_review(recipe_id, review_id)
+					return self.status_200()
+				except:
+					return self.status_404()
 			else:
 				return self.status_400()
 		else:
@@ -201,12 +194,11 @@ def favorite_recipes():
 
 		if ObjectId.is_valid(user_id):
 
-			if method == 'GET':
-				try:
-					recipes = dao.get_user_favorite_recipes(user_id)
-					return recipes
-				except:
-					return self.status_404()
+			try:
+				recipes = dao.get_user_favorite_recipes(user_id)
+				return recipes
+			except:
+				return self.status_404()
 		else:
 			return self.status_400()
 	else:
@@ -219,20 +211,19 @@ def add_favorite_recipes():
 
 		if ObjectId.is_valid(user_id):
 
-			if method == 'POST':
-				if "recipe_id" in request.json:
-					recipe_id = request.json["recipe_id"]
+			if "recipe_id" in request.json:
+				recipe_id = request.json["recipe_id"]
 
-					if ObjectId.is_valid(user_id):
-						try:
-							dao.favorite_recipe(recipe_id, user_id)
-							return self.status_200()
-						except:
-							return self.status_404()
-					else:
-						return self.status_400()
+				if ObjectId.is_valid(user_id):
+					try:
+						dao.favorite_recipe(recipe_id, user_id)
+						return self.status_200()
+					except:
+						return self.status_404()
 				else:
 					return self.status_400()
+			else:
+				return self.status_400()
 		else:
 			return self.status_400()
 	else:
@@ -245,20 +236,19 @@ def delete_favorite_recipes():
 
 		if ObjectId.is_valid(user_id):
 
-			if method == 'DELETE':
-				if "recipe_id" in request.json:
-					recipe_id = request.json["recipe_id"]
+			if "recipe_id" in request.json:
+				recipe_id = request.json["recipe_id"]
 
-					if ObjectId.is_valid(recipe_id):
-						try:
-							dao.unfavorite_recipe(recipe_id, user_id)
-							return self.status_200()
-						except:
-							return self.status_404()
-					else:
-						return self.status_400()
+				if ObjectId.is_valid(recipe_id):
+					try:
+						dao.unfavorite_recipe(recipe_id, user_id)
+						return self.status_200()
+					except:
+						return self.status_404()
 				else:
 					return self.status_400()
+			else:
+				return self.status_400()
 		else:
 			return self.status_400()
 	else:
